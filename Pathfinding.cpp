@@ -21,7 +21,6 @@ std::vector<State> GridRow (std::string line) {
     return row;
 }
 
-
 std::vector<std::vector<State>> ReadGrid (std::string path){
     std::vector<std::vector<State>> board;
     std::ifstream sgrid(path);
@@ -34,14 +33,20 @@ std::vector<std::vector<State>> ReadGrid (std::string path){
     return board;
 }
 
+// Time to begin the pathfinding function itself. done in parts
+std::vector<std::vector<State>> Search (std::vector<std::vector<State>> grid, int start[2], int end[2]){
+    std::vector<std::vector<State>> result;
+    std::cout<< "No path found!" << "\n";
+    return result;
+}
+
 //time to make enums to make our grid more readable.
 std::string CellString (State cell){
     switch (cell){
-        case State::kObstacle: return " 8  ";
-        case State::kEmpty: return " 0  ";
+        case State::kObstacle: return " (8)  ";
+        case State::kEmpty: return "  0   ";
     }
 }
-
 
 void PrintBoard (const std::vector<std::vector<State>> grid){
     for (int i=0; i< grid.size(); i++) {
@@ -54,5 +59,8 @@ void PrintBoard (const std::vector<std::vector<State>> grid){
 
 int main() {   
     std::vector<std::vector<State>> board = ReadGrid("grid.txt");
-    PrintBoard(board);
+    int start[2]{0,0};
+    int end[2] {4,5};
+    std::vector<std::vector<State>> solution = Search(board, start, end);
+    PrintBoard(solution);
 }
