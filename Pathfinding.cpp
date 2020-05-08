@@ -1,46 +1,58 @@
-// to use cin & cout mostly as I understand it. 
 #include <iostream>
-/* to use ifstream & ofstream, we used ofstream to store a grid on another file. 
-if the file does not exist it makes one.
-we now use the ifstream to stream the file content, which we will use to make our grid.
-*/
 #include <fstream>
-// pretty self-explanatory
 #include <vector>
-//we use sstream to split up the txt file.
 #include <sstream>
 
+enum class State {kEmpty, kObstacle};
 
-
-//Now I want to not just show the info, but save it in a 2d vector to work with the data.
-// This function is used to get a one line of strings, and split it into a number, the whole row will go into a 1d vector.
-std::vector<int> GridRow (std::string line) {
-    std::vector<int> row;
+//changing all the vectors to return States to make the grid more readable
+std::vector<State> GridRow (std::string line) {
+    std::vector<State> row;
     int n;
     char c;
     std::istringstream sline(line);
     while (sline >> n >> c && c == ',') {
-        row.push_back(n);
+        if (n == 1) {
+        row.push_back(State::kObstacle);
+    } else {
+        row.push_back(State::kEmpty);
+           }
     }
     return row;
 }
 
-// now i'm changing this to return a 2d vector.
-// Also I had to change the position of the functions. Since this function calls on GridRow,
-// the function needs to be defined first to be able to get called upon.
-std::vector<std::vector<int>> ReadGrid (std::string path){
-    std::vector<std::vector<int>> board;
+
+std::vector<std::vector<State>> ReadGrid (std::string path){
+    std::vector<std::vector<State>> board;
     std::ifstream sgrid(path);
     std::string line;
 
     while (getline(sgrid,line)){
-        //making a 1d vector that will be take each string row, and push every vector row into the 2d vector.
-        std::vector<int> row = GridRow(line);
+        std::vector<State> row = GridRow(line);
         board.push_back(row);
     }
     return board;
 }
 
+//time to make enums to make our grid more readable.
+std::string CellString (State cell){
+    switch (cell){
+        case State::kObstacle: return " 8  ";
+        case State::kEmpty: return " 0  ";
+    }
+}
+
+
+void PrintBoard (const std::vector<std::vector<State>> grid){
+    for (int i=0; i< grid.size(); i++) {
+        for (int j=0; j < grid[i].size(); j++){
+            std::cout << CellString (grid[i][j]);
+        }
+        std::cout << "\n";
+    }
+}
+
 int main() {   
-    ReadGrid("grid.txt");
+    std::vector<std::vector<State>> board = ReadGrid("grid.txt");
+    PrintBoard(board);
 }
