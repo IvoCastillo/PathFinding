@@ -3,7 +3,7 @@
 #include <vector>
 #include <sstream>
 
-enum class State {kEmpty, kObstacle};
+enum class State {kEmpty, kObstacle, kClosed};
 
 //changing all the vectors to return States to make the grid more readable
 std::vector<State> GridRow (std::string line) {
@@ -31,6 +31,17 @@ std::vector<std::vector<State>> ReadGrid (std::string path){
         board.push_back(row);
     }
     return board;
+}
+
+//function to calculate the h value, the function works, but doesnt seem logical* note to self, ask sicco
+int Heuristic (int x1, int x2, int y1, int y2){
+    return abs(x2-x1)+abs(y2-y1);
+};
+
+//starting to work with references for this one
+void AddToOpen(int x, int y, int g, int h, std::vector<std::vector<State>>& grid, std::vector<std::vector<int>>& dalist){
+    dalist.push_back(std::vector<int>{x,y,g,h});
+    grid[x][y] = State::kClosed;
 }
 
 // Time to begin the pathfinding function itself. done in parts
