@@ -2,9 +2,17 @@
 #include <fstream>
 #include <vector>
 #include <sstream>
-//need the algorithm to be able to use the sort command
 #include <algorithm>
-enum class State {kEmpty, kObstacle, kClosed, kPath};
+
+//I am aware of the ease of using the "using std:: ...." lines. But while i'm still learning I prefer to write it
+// all myself. To avoid silly mistakes like calling a vector vector.
+
+
+//I added the last two enums which will represent the starting and ending position.
+enum class State {kEmpty, kObstacle, kClosed, kPath, kStart, kFinish};
+
+//This array will be used to check the directions.
+const int directions[4][2] {{0,1},{1,0},{-1,0}, {0,-1}};
 
 //changing all the vectors to return States to make the grid more readable
 std::vector<State> GridRow (std::string line) {
@@ -51,12 +59,43 @@ int Heuristic (int x1, int x2, int y1, int y2){
     return abs(x2-x1)+abs(y2-y1);
 };
 
+// checking if the cell is empty and and on the actual grid
+bool CheckDaCells (int x, int y, std::vector<std::vector<State>> &grid) {
+    bool xrow = (x >= 0 && x < grid.size());
+    bool yrow = (y >= 0 && y < grid[0].size());
+    if (xrow && yrow){
+        return grid[x][y] == State::kEmpty;
+    } else { return false; }
+}
+
+
 //starting to work with references for this one
-void AddToOpen(int x, int y, int g, int h, std::vector<std::vector<State>>& grid, std::vector<std::vector<int>>& dalist){
+void AddToOpen(int x, int y, int g, int h, std::vector<std::vector<int>>& dalist, std::vector<std::vector<State>>& grid){
     //instead of initializing a new vector to push into the 2d one, i just do it right away.
     dalist.push_back(std::vector<int>{x,y,g,h});
     grid[x][y] = State::kClosed;
 }
+
+void ExpandNeighbors (const std::vector<int> &currentnode, int finish[2], std::vector<std::vector<int>> &openlist, std::vector<std::vector<State>>& grid){
+    //get current nodes data
+    int x = currentnode[0];
+    int y = currentnode[1];
+    int g = currentnode[2];
+
+    //Loop through the current node's current neighbors
+    for (int i = 0; i<4; i++){
+        int x2 = x + directions[i][0];
+        int y2 = y + directions[i][1];
+
+        if(CheckDaCells(x2,y2,grid)){
+            int g2 = g+1;
+            int h2 = Heuristic(x2, y2, finish[0], finish[1]);
+            AddToOpen(x2,y2,g2,h2,openlist, grid);
+        }
+    }
+
+}
+
 
 // Time to begin the pathfinding function itself. done in parts
 std::vector<std::vector<State>> Search (std::vector<std::vector<State>> grid, int start[2], int end[2]){
@@ -69,7 +108,7 @@ std::vector<std::vector<State>> Search (std::vector<std::vector<State>> grid, in
     int h = Heuristic(x,y, end[0], end[1]);
 
     // here i will add it to the the node to the open vector.
-    AddToOpen(x, y, g, h, grid, open) ;
+    AddToOpen(x, y, g, h, open, grid) ;
 
     while (open.size() > 0) {
         CellSort(&open);
