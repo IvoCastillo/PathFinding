@@ -21,10 +21,10 @@ std::vector<State> GridRow (std::string line) {
     char c;
     std::istringstream sline(line);
     while (sline >> n >> c && c == ',') {
-        if (n == 1) {
-        row.push_back(State::kObstacle);
-    } else {
+        if (n == 0) {
         row.push_back(State::kEmpty);
+    } else {
+        row.push_back(State::kObstacle);
            }
     }
     return row;
@@ -56,16 +56,16 @@ void CellSort (std::vector<std::vector<int>> *v){
 
 //function to calculate the h value, the function works, but doesnt seem logical* note to self, ask sicco
 int Heuristic (int x1, int x2, int y1, int y2){
-    return abs(x2-x1)+abs(y2-y1);
+    return std::abs(x2-x1)+ std::abs(y2-y1);
 };
 
 // checking if the cell is empty and and on the actual grid
 bool CheckDaCells (int x, int y, std::vector<std::vector<State>> &grid) {
     bool xrow = (x >= 0 && x < grid.size());
     bool yrow = (y >= 0 && y < grid[0].size());
-    if (xrow && yrow){
+    if (xrow && yrow)
         return grid[x][y] == State::kEmpty;
-    } else { return false; }
+     return false; 
 }
 
 
@@ -101,6 +101,7 @@ void ExpandNeighbors (const std::vector<int> &currentnode, int finish[2], std::v
 std::vector<std::vector<State>> Search (std::vector<std::vector<State>> grid, int start[2], int end[2]){
 
     std::vector<std::vector<int>> open;
+ 
     //here i will initialize the starting node.
     int x = start[0];
     int y = start[1];
@@ -120,11 +121,12 @@ std::vector<std::vector<State>> Search (std::vector<std::vector<State>> grid, in
         grid[x][y] = State::kPath;
 
         if (x == end[0] && y == end[1]) {
+            grid[start[0]][start[1]] = State::kStart;
+            grid[end[0]][end[1]] = State::kFinish;
             return grid;
         }
+        ExpandNeighbors(currentnode,end,open,grid);
     }
-
-
     std::cout<< "No path found!" << "\n";
     return std::vector<std::vector<State>>{};
 }
@@ -133,7 +135,11 @@ std::vector<std::vector<State>> Search (std::vector<std::vector<State>> grid, in
 std::string CellString (State cell){
     switch (cell){
         case State::kObstacle: return " (8)  ";
-        case State::kEmpty: return "  0   ";
+        case State::kPath: return "  §   ";
+        case State::kStart: return "  !   ";
+        case State::kFinish: return " =+=  ";
+        default: return "  0   ";
+      
     }
 }
 
@@ -147,9 +153,9 @@ void PrintBoard (const std::vector<std::vector<State>> grid){
 }
 
 int main() {   
-    std::vector<std::vector<State>> board = ReadGrid("grid.txt");
     int start[2]{0,0};
-    int end[2] {4,5};
+    int end[2]{4,5};
+    std::vector<std::vector<State>> board = ReadGrid("grid.txt");
     std::vector<std::vector<State>> solution = Search(board, start, end);
     PrintBoard(solution);
 }
